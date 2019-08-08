@@ -1,0 +1,42 @@
+{
+    "variables": {
+        "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+        "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+    },
+    "builders": [{
+        "name": "ubuntu18-ember-ami",
+        "ami_name": "ember-ubuntu-{{isotime | clean_ami_name}}",
+        "ami_description": "An Ubuntu 18.04 AMI with Consul installed.",
+        "instance_type": "t2.micro",
+        "associate_public_ip_address": true,
+        "region": "us-east-1",
+        "type": "amazon-ebs",
+        "vpc_id": "vpc-057468d5f36b97eee",
+        "subnet_id": "subnet-096c74904d5932ea8",
+        "source_ami_filter": {
+            "filters": {
+                "virtualization-type": "hvm",
+                "architecture": "x86_64",
+                "name": "*ubuntu-bionic-daily-amd64-server-*",
+                "block-device-mapping.volume-type": "gp2",
+                "root-device-type": "ebs"
+            },
+            "owners": ["099720109477"],
+            "most_recent": true
+        },
+        "ssh_username": "ubuntu"
+    }],
+    "provisioners": [{
+            "type": "shell",
+            "inline": [
+                "ls -al /home/ubuntu"
+            ]
+        },
+        {
+            "type": "shell",
+            "execute_command": "sudo env {{ .Vars }} {{ .Path }}",
+            "scripts": ["./provision.sh"],
+            "expect_disconnect": true
+        }
+    ]
+}
